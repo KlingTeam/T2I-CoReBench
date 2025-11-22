@@ -41,6 +41,7 @@
 **Overview of our T2I-CoReBench.** (a) Our benchmark comprehensively covers two fundamental T2I capabilities (i.e., *composition* and *reasoning*), further refined into 12 dimensions. (b–e) Our benchmark poses greater challenges to advanced T2I models, with higher compositional density than [DPG-Bench](https://arxiv.org/abs/2403.05135) and greater reasoning intensity than [R2I-Bench](https://arxiv.org/abs/2505.23493), enabling clearer performance differentiation across models under real-world complexities. Each image is scored based on the ratio of correctly generated elements.
 
 ## 📣 News
+- `2025/11` 🌟 We have updated the evaluation results of [🍌 Nano Banana Pro](https://ai.google.dev/gemini-api/docs/image-generation#gemini-3-capabilities), which achieves a new SOTA across all 12 dimensions by a substantial margin (see our [🚀 project page](https://t2i-corebench.github.io/) for more details).
 - `2025/10` 🌟 We have integrated the [Qwen3-VL series](https://github.com/QwenLM/Qwen3-VL) MLLMs into `evaluate.py`.
 - `2025/09` 🌟 We have updated the evaluation results of [Seedream 4.0](https://seed.bytedance.com/en/seedream4_0).
 - `2025/09` 🌟 We have released our benchmark dataset and code.
