@@ -39,7 +39,7 @@
     "Prompt": "Generate an image showing three magical crystals on pedestals, arranged from left to right, that transform through a sequence. Initially all crystals are white. The transformation rules are: (1) Any white crystal becomes red after one pulse. (2) Any red crystal becomes blue after one pulse. (3) Any blue crystal becomes green after one pulse. (4) The left crystal receives 3 pulses total. (5) The middle crystal receives 2 pulses total. (6) The right crystal receives 1 pulse total. (7) All crystals start white and transform simultaneously. Show the final state after all transformations.",
     "Checklist": [
       { "question": "Is the left crystal green in the final state?", "tags": ["multi-hop"]},
-      { "question": "Is the middle crystal blue in the final state?", "tags": ["multi_hop"]},
+      { "question": "Is the middle crystal blue in the final state?", "tags": ["multi-hop"]},
       { "question": "Is the right crystal red in the final state?", "tags": ["1-hop"]}
     ],
     "Remark": "Claude"
@@ -891,9 +891,9 @@
     "Prompt": "Generate an image of four fantasy adventurers — a knight, a wizard, an archer and a rogue — seated around a circular stone table viewed from above. The seats correspond to the compass points north (top), east (right), south (bottom) and west (left). Each character wears a cloak of a different colour chosen from red, blue, green and yellow. Work out the only possible seating position and cloak colour of every character by logically solving the clues below, then depict the scene.\n\n1. The Knight wears the Green cloak.\n2. The Wizard sits opposite the Knight.\n3. The Wizard wears the Blue cloak.\n4. The Archer sits in the West seat and wears the Yellow cloak.\n5. The Rogue sits immediately clockwise from the Knight.",
     "Checklist": [
       { "question": "Is the adventurer at the north seat a knight?", "tags": ["multi-hop"] },
-      { "question": "Is the cloak at the north seat green?", "tags": ["multi_hop"] },
+      { "question": "Is the cloak at the north seat green?", "tags": ["multi-hop"] },
       { "question": "Is the adventurer at the east seat a rogue?", "tags": ["multi-hop"] },
-      { "question": "Is the cloak at the east seat red?", "tags": ["multi_hop"] },
+      { "question": "Is the cloak at the east seat red?", "tags": ["multi-hop"] },
       { "question": "Is the adventurer at the south seat a wizard?", "tags": ["multi-hop"] },
       { "question": "Is the cloak at the south seat blue?", "tags": ["0-hop"] },
       { "question": "Is the adventurer at the west seat an archer?", "tags": ["multi-hop"] },
@@ -911,9 +911,9 @@
       { "question": "Does Box A directly contain Box D?", "tags": ["multi-hop"] },
       { "question": "Is Box D yellow?", "tags": ["0-hop"] },
       { "question": "Does Box D directly contain Box C?", "tags": ["multi-hop"] },
-      { "question": "Is Box C blue?", "tags": ["multi_hop"] },
+      { "question": "Is Box C blue?", "tags": ["multi-hop"] },
       { "question": "Does Box C directly contain Box B?", "tags": ["multi-hop"] },
-      { "question": "Is Box B red?", "tags": ["multi_hop"] },
+      { "question": "Is Box B red?", "tags": ["multi-hop"] },
       { "question": "Is Box B the innermost box?", "tags": ["multi-hop"] }
     ],
     "Remark": "GPT"
@@ -942,13 +942,13 @@
     "Prompt": "Generate an image of a simple garden seen from above, divided into four equal plots arranged in a 2 × 2 grid: northwest (NW), northeast (NE), southwest (SW) and southeast (SE). Each plot contains exactly one flower — a rose, a tulip, a daisy or a lily — and each flower is a different colour selected from red, blue, yellow and white. Work out the only possible flower and colour in every plot by solving the clues below, then render the scene.\n\n1. The red flower is adjacent (shares an edge) to the lily.\n2. The tulip is not in the northeast plot.\n3. The blue flower is diagonally across from the tulip.\n4. The daisy is white.\n5. The yellow flower is north of the rose.\n6. The northeast plot is not yellow.",
     "Checklist": [
       { "question": "Is the NW plot a tulip?", "tags": ["multi-hop"] },
-      { "question": "Is the NW plot yellow?", "tags": ["multi_hop"] },
+      { "question": "Is the NW plot yellow?", "tags": ["multi-hop"] },
       { "question": "Is the NE plot a daisy?", "tags": ["multi-hop"] },
       { "question": "Is the NE plot white?", "tags": ["0-hop"] },
       { "question": "Is the SW plot a rose?", "tags": ["multi-hop"] },
-      { "question": "Is the SW plot red?", "tags": ["multi_hop"] },
+      { "question": "Is the SW plot red?", "tags": ["multi-hop"] },
       { "question": "Is the SE plot a lily?", "tags": ["multi-hop"] },
-      { "question": "Is the SE plot blue?", "tags": ["multi_hop"] }
+      { "question": "Is the SE plot blue?", "tags": ["multi-hop"] }
     ],
     "Remark": "GPT"
   },
@@ -1004,11 +1004,11 @@
       { "question": "Is the north crystal a cube?", "tags": ["multi-hop"] },
       { "question": "Is the north crystal air?", "tags": ["0-hop"] },
       { "question": "Is the east crystal a sphere?", "tags": ["multi-hop"] },
-      { "question": "Is the east crystal water?", "tags": ["multi_hop"] },
+      { "question": "Is the east crystal water?", "tags": ["multi-hop"] },
       { "question": "Is the south crystal an octahedron?", "tags": ["multi-hop"] },
-      { "question": "Is the south crystal fire?", "tags": ["multi_hop"] },
+      { "question": "Is the south crystal fire?", "tags": ["multi-hop"] },
       { "question": "Is the west crystal a pyramid?", "tags": ["0-hop"] },
-      { "question": "Is the west crystal earth?", "tags": ["multi_hop"] }
+      { "question": "Is the west crystal earth?", "tags": ["multi-hop"] }
     ],
     "Remark": "GPT"
   },
@@ -1034,15 +1034,15 @@
     "Prompt": "Five hard-cover books — Alpha, Bravo, Charlie, Delta and Echo — stand on a shelf from left (position 1) to right (position 5). Each book cover is a different colour: red, blue, green, yellow or purple. Work out the only possible title-and-colour order, then illustrate the row.\n\n1. The yellow book is somewhere to the right of Echo.\n2. Alpha is exactly between the blue book and Delta (three consecutive positions).\n3. The green book is immediately to the left of Bravo.\n4. Charlie is not at either end.\n5. The purple book is immediately to the right of Alpha.\n6. Bravo is not yellow.\n7. Charlie is green.",
     "Checklist": [
       { "question": "Is the book in position 1 titled Echo?",        "tags": ["multi-hop"] },
-      { "question": "Is the book in position 1 blue?",               "tags": ["multi_hop"] },
+      { "question": "Is the book in position 1 blue?",               "tags": ["multi-hop"] },
       { "question": "Is the book in position 2 titled Alpha?",       "tags": ["multi-hop"] },
-      { "question": "Is the book in position 2 yellow?",             "tags": ["multi_hop"] },
+      { "question": "Is the book in position 2 yellow?",             "tags": ["multi-hop"] },
       { "question": "Is the book in position 3 titled Delta?",       "tags": ["multi-hop"] },
-      { "question": "Is the book in position 3 purple?",             "tags": ["multi_hop"] },
+      { "question": "Is the book in position 3 purple?",             "tags": ["multi-hop"] },
       { "question": "Is the book in position 4 titled Charlie?",     "tags": ["multi-hop"] },
       { "question": "Is the book in position 4 green?",              "tags": ["0-hop"] },
       { "question": "Is the book in position 5 titled Bravo?",       "tags": ["multi-hop"] },
-      { "question": "Is the book in position 5 red?",                "tags": ["multi_hop"] }
+      { "question": "Is the book in position 5 red?",                "tags": ["multi-hop"] }
     ],
     "Remark": "GPT"
   },
