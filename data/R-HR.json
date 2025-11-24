@@ -7,7 +7,7 @@
       { "question": "Is the wooden cutting board floating upward away from the counter?", "tags": ["hypo_pos"] },
       { "question": "Are the apples floating upward out of the bowl?", "tags": ["hypo_pos"] },
       { "question": "Is the potted plant (including soil and plant) floating upward away from the windowsill?", "tags": ["hypo_pos"] },
-      { "question": "Is the steel knife remaining on the cutting board?", "tags": ["hypo_neg"] },
+      { "question": "Is the steel knife remaining on the counter?", "tags": ["hypo_neg"] },
       { "question": "Is the milk floating upward out of the glass?", "tags": ["hypo_pos"] },
       { "question": "Are the leather oven mitts floating upward away from the hook?", "tags": ["hypo_pos"] },
       { "question": "Is the ceramic plate remaining in its normal position?", "tags": ["hypo_neg"] },
