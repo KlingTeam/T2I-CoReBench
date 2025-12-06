@@ -381,7 +381,7 @@ if __name__ == '__main__':
         "Qwen3_VL_235B_A22B_Instruct" : "Qwen/Qwen3-VL-235B-A22B-Instruct",
         "Qwen3_VL_235B_A22B_Thinking" : "Qwen/Qwen3-VL-235B-A22B-Thinking",
     }
-
+    
     if "Qwen" in args.mllm: 
         start_evaluation_qwen(args, MLLMs[args.mllm])
     if "Gemini" in args.mllm: 
