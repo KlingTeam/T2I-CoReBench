@@ -359,7 +359,7 @@ if __name__ == '__main__':
         FLUX.1-schnell, FLUX.1-dev, FLUX.1-Krea-dev | SD-3-Medium, SD-3.5-Medium, SD-3.5-Large | PixArt-Alpha, PixArt-Sigma | Qwen-Image
     """)
     parser.add_argument('--mllm', type=str, help="""
-        Gemini_2_5_Flash, Qwen2_5_VL_72B, Qwen3_VL_30B_Instruct, Qwen3_VL_30B_Thinking, Qwen3_VL_235B_Instruct, Qwen3_VL_235B_Thinking
+        Gemini_2_5_Flash, Qwen2_5_VL_72B, Qwen3_VL_32B_Instruct, Qwen3_VL_32B_Thinking, Qwen3_VL_30B_A3B_Instruct, Qwen3_VL_30B_A3B_Thinking, Qwen3_VL_235B_A22B_Instruct, Qwen3_VL_235B_A22B_Thinking
     """)
     parser.add_argument('--gen_eval_file', type=str, help="""
         C-MI, C-MA, C-MR, C-TR | R-LR, R-BR, R-HR, R-PR | R-GR, R-AR | R-CR, R-RR
@@ -374,10 +374,12 @@ if __name__ == '__main__':
     MLLMs = {
         "Gemini_2_5_Flash"       : ["gemini-2.5-flash", "GEMINI_API_KEY"],
         "Qwen2_5_VL_72B"         : "Qwen/Qwen2.5-VL-72B-Instruct",
-        "Qwen3_VL_30B_Instruct"  : "Qwen/Qwen3-VL-30B-A3B-Instruct",
-        "Qwen3_VL_30B_Thinking"  : "Qwen/Qwen3-VL-30B-A3B-Thinking",
-        "Qwen3_VL_235B_Instruct" : "Qwen/Qwen3-VL-235B-A22B-Instruct",
-        "Qwen3_VL_235B_Thinking" : "Qwen/Qwen3-VL-235B-A22B-Thinking",
+        "Qwen3_VL_32B_Instruct"  : "Qwen/Qwen3-VL-32B-Instruct",
+        "Qwen3_VL_32B_Thinking"  : "Qwen/Qwen3-VL-32B-Thinking",
+        "Qwen3_VL_30B_A3B_Instruct"  : "Qwen/Qwen3-VL-30B-A3B-Instruct",
+        "Qwen3_VL_30B_A3B_Thinking"  : "Qwen/Qwen3-VL-30B-A3B-Thinking",
+        "Qwen3_VL_235B_A22B_Instruct" : "Qwen/Qwen3-VL-235B-A22B-Instruct",
+        "Qwen3_VL_235B_A22B_Thinking" : "Qwen/Qwen3-VL-235B-A22B-Thinking",
     }
 
     if "Qwen" in args.mllm: 
