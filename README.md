@@ -63,7 +63,7 @@ To evaluate text-to-image models on our T2I-CoReBench, follow these steps:
 
 ### 🖼️ Generate Images
 
-Use the provided script to generate images from the benchmark prompts in `./data`. You can customize the T2I models by editing `MODELS` and adjust GPU usage by setting `GPUS`. Here, we take *Qwen-Image* as an example, and the corresponding Python environment can be referred to in its [official repository](https://github.com/QwenLM/Qwen-Image).
+Use the provided script to generate images from the benchmark prompts in `./data`. You can customize the T2I models by editing `MODELS` and adjust GPU usage by setting `GPUS`. Here, we take [Qwen-Image](https://github.com/QwenLM/Qwen-Image) as an example, and the corresponding Python environment can be referred to its [official repository](https://github.com/QwenLM/Qwen-Image).
 
   ```bash
   bash sample.sh
