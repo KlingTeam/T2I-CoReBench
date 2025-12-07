@@ -46,7 +46,7 @@
 ## 📣 News
 - `2025/12` 🌟 We have updated the evaluation results of [FLUX.2-dev](https://huggingface.co/black-forest-labs/FLUX.2-dev) and [LongCat-Image](https://huggingface.co/meituan-longcat/LongCat-Image).
 - `2025/12` 🌟 We have updated the evaluation results of [HunyuanImage-3.0](https://github.com/Tencent-Hunyuan/HunyuanImage-3.0) and [Z-Image-Turbo](https://huggingface.co/Tongyi-MAI/Z-Image-Turbo).
-- `2025/11` 🌟 We have updated the evaluation results of [🍌 Nano Banana Pro](https://ai.google.dev/gemini-api/docs/image-generation#gemini-3-capabilities), which achieves a new SOTA across all 12 dimensions by a substantial margin (see [<img src='https://img.shields.io/badge/Leaderboard-7B2CBF?logo=instatus&logoColor=white' style="vertical-align: -3px;">](https://t2i-corebench.github.io/#leaderboard) for more details).
+- `2025/11` 🌟 We have updated the evaluation results of [🍌 Nano Banana Pro](https://ai.google.dev/gemini-api/docs/image-generation#gemini-3-capabilities), which achieves a new SOTA across all 12 dimensions by a substantial margin (see [<img src='https://img.shields.io/badge/Leaderboard-7B2CBF?logo=instatus&logoColor=white' style="vertical-align: -10px;">](https://t2i-corebench.github.io/#leaderboard) for more details).
 - `2025/10` 🌟 We have integrated the [Qwen3-VL series](https://github.com/QwenLM/Qwen3-VL) MLLMs into `evaluate.py`.
 - `2025/09` 🌟 We have updated the evaluation results of [Seedream 4.0](https://seed.bytedance.com/en/seedream4_0).
 - `2025/09` 🌟 We have released our benchmark dataset and code.
