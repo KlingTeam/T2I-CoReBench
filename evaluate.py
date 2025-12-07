@@ -372,12 +372,12 @@ if __name__ == '__main__':
     seed_everything(args.seed)
 
     MLLMs = {
-        "Gemini_2_5_Flash"       : ["gemini-2.5-flash", "GEMINI_API_KEY"],
-        "Qwen2_5_VL_72B"         : "Qwen/Qwen2.5-VL-72B-Instruct",
-        "Qwen3_VL_32B_Instruct"  : "Qwen/Qwen3-VL-32B-Instruct",
-        "Qwen3_VL_32B_Thinking"  : "Qwen/Qwen3-VL-32B-Thinking",
-        "Qwen3_VL_30B_A3B_Instruct"  : "Qwen/Qwen3-VL-30B-A3B-Instruct",
-        "Qwen3_VL_30B_A3B_Thinking"  : "Qwen/Qwen3-VL-30B-A3B-Thinking",
+        "Gemini_2_5_Flash"            : ["gemini-2.5-flash", "GEMINI_API_KEY"],
+        "Qwen2_5_VL_72B"              : "Qwen/Qwen2.5-VL-72B-Instruct",
+        "Qwen3_VL_32B_Instruct"       : "Qwen/Qwen3-VL-32B-Instruct",
+        "Qwen3_VL_32B_Thinking"       : "Qwen/Qwen3-VL-32B-Thinking",
+        "Qwen3_VL_30B_A3B_Instruct"   : "Qwen/Qwen3-VL-30B-A3B-Instruct",
+        "Qwen3_VL_30B_A3B_Thinking"   : "Qwen/Qwen3-VL-30B-A3B-Thinking",
         "Qwen3_VL_235B_A22B_Instruct" : "Qwen/Qwen3-VL-235B-A22B-Instruct",
         "Qwen3_VL_235B_A22B_Thinking" : "Qwen/Qwen3-VL-235B-A22B-Thinking",
     }
