@@ -13,14 +13,17 @@
     <a href='https://t2i-corebench.github.io/'>
       <img src='https://img.shields.io/badge/Project Page-0065D3?logo=rocket&logoColor=white'>
     </a>
+    <a href='https://t2i-corebench.github.io/#leaderboard'>
+      <img src='https://img.shields.io/badge/Leaderboard-7B2CBF?logo=instatus&logoColor=white'>
+    </a>
     <a href='https://arxiv.org/abs/2509.03516'>
       <img src='https://img.shields.io/badge/Arxiv-2509.03516-A42C25?style=flat&logo=arXiv&logoColor=A42C25'>
     </a>
     <a href='https://huggingface.co/datasets/lioooox/T2I-CoReBench'>
-      <img src='https://img.shields.io/badge/HuggingFace-Dataset-FFB000?style=flat&logo=huggingface&logoColor=white'>
+      <img src='https://img.shields.io/badge/HF-Dataset-FFB000?style=flat&logo=huggingface&logoColor=white'>
     </a>
     <a href='https://huggingface.co/datasets/lioooox/T2I-CoReBench-Images'>
-      <img src='https://img.shields.io/badge/HuggingFace-Images-FFB000?style=flat&logo=huggingface&logoColor=white'>
+      <img src='https://img.shields.io/badge/HF-Images-FFB000?style=flat&logo=huggingface&logoColor=white'>
     </a>
     <a href='https://github.com/KwaiVGI/T2I-CoReBench'>
       <img src='https://img.shields.io/badge/GitHub-Code-181717?style=flat&logo=github&logoColor=white'>
