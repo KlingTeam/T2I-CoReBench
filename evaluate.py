@@ -94,7 +94,7 @@ def start_evaluation_qwen(args, mllm_path, batch_size=128):
         llm_config.update(
             max_model_len=128000,
             dtype="bfloat16",
-            enable_expert_parallel=True,
+            enable_expert_parallel=any(k in args.mllm for k in ('A3B', 'A22B')),  # Enable expert parallelism only for MoE models (e.g., A3B or A22B)
             distributed_executor_backend="mp",
         )
     llm = LLM(**llm_config)
