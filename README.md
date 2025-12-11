@@ -75,7 +75,8 @@ If you wish to sample with your own model, simply modify the sampling code in `s
 
 We provide evaluation code supporting various MLLMs, including **Gemini 2.5 Flash** (used in our main paper) and the **Qwen series** (complementary open-source evaluators), both of which are used to assess the generated images in our benchmark.
 
-> **Note:** If Gemini 2.5 Flash is not available due to the cost of closed-source APIs, we recommend using [Qwen3-VL-32B-Thinking](https://huggingface.co/Qwen/Qwen3-VL-32B-Thinking) as a substitute since it offers a strong balance between human annotator consistency and computational cost. We also report the evaluation results of different MLLM evaluators in our [🏆 Leaderboard](https://t2i-corebench.github.io/#leaderboard).
+> [!NOTE]
+> If Gemini 2.5 Flash is not available due to the cost of closed-source APIs, we recommend using [Qwen3-VL-32B-Thinking](https://huggingface.co/Qwen/Qwen3-VL-32B-Thinking) as a substitute since it offers a strong balance between human annotator consistency and computational cost. We also report the evaluation results of different MLLM evaluators in our [🏆 Leaderboard](https://t2i-corebench.github.io/#leaderboard).
 
 For the **Gemini series**, please refer to the [Gemini documentation](https://ai.google.dev/gemini-api/docs) for environment setup. An official API key is required and should be specified in `evaluate.py` at `line 375`.  For the **Qwen series**, please follow the [vLLM User Guide](https://docs.vllm.ai/en/latest/getting_started/quickstart.html#installation) and consult their [official repository](https://github.com/QwenLM/Qwen3-VL) for environment setup. In our experiments, all Qwen evaluators are implemented using 8 × A800 GPUs (80GB each). 
 
