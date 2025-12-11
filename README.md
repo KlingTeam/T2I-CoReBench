@@ -154,7 +154,7 @@ If you find the repo useful, please consider citing.
 ```
 @article{li2025easier,
   title={Easier Painting Than Thinking: Can Text-to-Image Models Set the Stage, but Not Direct the Play?},
-  author={Li, Ouxiang and Wang, Yuan and Hu, Xinting and Huang, Huijuan and Chen, Rui and Ou, Jiarong and Tao, Xin and Wan, Pengfei and Feng, Fuli},
+  author={Li, Ouxiang and Wang, Yuan and Hu, Xinting and Huang, Huijuan and Chen, Rui and Ou, Jiarong and Tao, Xin and Wan, Pengfei and Qi, Xiaojuan and Feng, Fuli},
   journal={arXiv preprint arXiv:2509.03516},
   year={2025}
 }
