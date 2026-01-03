@@ -8,7 +8,6 @@ from tqdm import tqdm
 from torch.utils.data import Dataset
 from transformers import AutoProcessor
 from vllm import LLM, SamplingParams
-from qwen_vl_utils import process_vision_info
 from sample import seed_everything
 
 
@@ -67,34 +66,49 @@ class PromptImageDataset(Dataset):
         return image_name.split('.')[0], img_path, self.eval_data[key]
 
 
-def custom_collate_fn(batch):
-    return batch
+def run_inference(llm, current_requests, sampling_params, max_tokens, extract_fn, is_last_round):
+    sampling_params.max_tokens = max_tokens
+    request_ids, inputs = zip(*[(r['request_id'], r['input']) for r in current_requests])
+    llm_outputs = llm.generate(inputs, sampling_params=sampling_params, use_tqdm=True)
+    
+    in_toks = [len(o.prompt_token_ids) for o in llm_outputs]
+    out_toks = [len(o.outputs[0].token_ids) for o in llm_outputs]
+    print(f"  → Token count: avg {sum(in_toks)/len(in_toks):.0f}+{sum(out_toks)/len(out_toks):.0f}, "
+          f"max {max(in_toks)} + {max(out_toks)}, total {sum(in_toks):,} + {sum(out_toks):,}")
+
+    results, retry_requests = {}, []
+    for i, output in enumerate(llm_outputs):
+        text = extract_fn(output.outputs[0].text)
+        if text.strip() == "" and not is_last_round:
+            retry_requests.append(current_requests[i])
+        else:
+            results[request_ids[i]] = text
+    return results, retry_requests
 
 
-def start_evaluation_qwen(args, mllm_path, batch_size=128):
+def start_evaluation_qwen(args, mllm_path, batch_size=64, max_rounds=3, initial_max_tokens=512):
 
-    if "235B" in args.mllm: batch_size = int(batch_size / 2)
+    from qwen_vl_utils import process_vision_info
 
     llm_config = dict(
         model=mllm_path,
+        max_model_len=25600,
         max_num_seqs=batch_size,
-        limit_mm_per_prompt={"image": 1, "video": 0},
+        gpu_memory_utilization=0.85,
         tensor_parallel_size=torch.cuda.device_count(),
+        limit_mm_per_prompt={"image": 1, "video": 0},
         mm_encoder_tp_mode="data",
     )
 
     # Qwen2.5-VL Usage Guide: https://docs.vllm.ai/projects/recipes/en/latest/Qwen/Qwen2.5-VL.html
     if "Qwen2_5" in args.mllm:
-        llm_config.update(
-            max_model_len=65536,
-        )
+        pass
     # Qwen3-VL Usage Guide: https://docs.vllm.ai/projects/recipes/en/latest/Qwen/Qwen3-VL.html
     elif "Qwen3" in args.mllm:
         os.environ['VLLM_WORKER_MULTIPROC_METHOD'] = 'spawn'
         llm_config.update(
-            max_model_len=128000,
             dtype="bfloat16",
-            enable_expert_parallel=any(k in args.mllm for k in ('A3B', 'A22B')),  # Enable expert parallelism only for MoE models (e.g., A3B or A22B)
+            enable_expert_parallel='_A' in args.mllm,  # Enable expert parallelism only for MoE models (e.g., Qwen3_VL_30B_A3B_Instruct)
             distributed_executor_backend="mp",
         )
     llm = LLM(**llm_config)
@@ -103,129 +117,121 @@ def start_evaluation_qwen(args, mllm_path, batch_size=128):
     sampling_params = SamplingParams(
         temperature=0.0,
         repetition_penalty=1.05,
-        max_tokens=8192,
         stop_token_ids=[],
     )
 
     for MODEL in [m.strip() for m in args.model.split(",")]:
         for TASK in [t.strip() for t in args.gen_eval_file.split(",")]:
-            print(f"===== Start Inference | {MODEL} | {TASK} =====")
 
-            RESULT = {}
+            # region [1. Pre-process: Load data and build requests]
+            print(f"===== Start Inference | {MODEL} | {TASK} =====")
             image_path = os.path.join(args.output_path, MODEL, TASK)
             image_names = sorted([f for f in os.listdir(image_path) if f.lower().endswith('.png')])
-            
-            # If the model has already been evaluated for this task, skip the evaluation
+
             result_file = f"{args.output_path}/{MODEL}/{TASK}-{args.mllm}.json"
             if os.path.exists(result_file) and not args.update: continue
-            
+
             with open(f"data/{TASK.strip()}.json", 'r', encoding='utf-8') as f:
                 eval_data = json.load(f)
-            
-            # Prepare all inference requests in batch
-            all_requests, metadata_map = [], {}
-            
+
+            # Load cached results if updating
+            PRE_RESULT = json.load(open(result_file, "r")) if args.update and os.path.exists(result_file) else None
+
+            all_requests, metadata_map, cached_results = [], {}, {}
             dataset = PromptImageDataset(image_path, image_names, eval_data)
-            
+
             for (ID, PATH, METADATA) in dataset:
-                image_messages = [
-                    {
-                        "role": "user",
-                        "content": [{"type": "image", "image": PATH}],
-                    }
-                ]
-                image_inputs, video_inputs, video_kwargs = process_vision_info(image_messages,
-                    image_patch_size=processor.image_processor.patch_size, return_video_kwargs=True, return_video_metadata=True,
+                # Check if result can be reused from cache
+                def is_cached(qid, question):
+                    try:
+                        return (
+                            PRE_RESULT[ID]['Prompt'] == METADATA["Prompt"] and
+                            PRE_RESULT[ID]['Checklist'][qid]['question'] == question["question"] and
+                            PRE_RESULT[ID]['Checklist'][qid].get('score') in [0, 1]
+                        )
+                    except: 
+                        return False
+                
+                # Skip image preprocessing if all questions are cached
+                if all(is_cached(qid, q) for qid, q in enumerate(METADATA["Checklist"])):
+                    for qid, q in enumerate(METADATA["Checklist"]):
+                        request_id = f"{ID}_{qid}"
+                        cached_results[request_id] = ["no", "yes"][PRE_RESULT[ID]['Checklist'][qid]['score']]
+                        metadata_map[request_id] = {"item_id": ID, "question_id": qid, "metadata": METADATA}
+                    continue
+                
+                # Preprocess image
+                image_inputs, _, _ = process_vision_info(
+                    [{"role": "user", "content": [{"type": "image", "image": PATH}]}],
+                    image_patch_size=processor.image_processor.patch_size, 
+                    return_video_kwargs=True, return_video_metadata=True
                 )
                 mm_data = {"image": image_inputs}
                 
+                # Create request for each question
                 for QID, QUESTION in enumerate(METADATA["Checklist"]):
-
+                    request_id = f"{ID}_{QID}"
+                    metadata_map[request_id] = {"item_id": ID, "question_id": QID, "metadata": METADATA}
+                    
+                    # Check individual question cache
+                    if is_cached(QID, QUESTION):
+                        cached_results[request_id] = ["no", "yes"][PRE_RESULT[ID]['Checklist'][QID]['score']]
+                        continue
+                    
                     TEXT = f'Prompt: "{METADATA["Prompt"]}"\nQuestion: "{QUESTION["question"]}"'
                     messages = [
                         {"role": "system", "content": TEMPLATE},
-                        {
-                            "role": "user",
-                            "content": [
-                                {"type": "image", "image": PATH},
-                                {"type": "text", "text": TEXT},
-                            ],
-                        },
+                        {"role": "user", "content": [{"type": "image", "image": PATH}, {"type": "text", "text": TEXT}]}
                     ]
-                    prompt = processor.apply_chat_template(
-                        messages, tokenize=False, add_generation_prompt=True,
-                    )
-                    
-                    request_id = f"{ID}_{QID}"
+                    prompt = processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
                     all_requests.append({
-                        "prompt": prompt,
-                        "multi_modal_data": mm_data,
                         "request_id": request_id,
+                        "input": {"prompt": prompt, "multi_modal_data": mm_data}
                     })
-                    
-                    metadata_map[request_id] = {
-                        "item_id": ID,
-                        "question_id": QID,
-                        "metadata": METADATA
-                    }
-            print(f"Total requests: {len(all_requests)}")
-            
-            if args.update:
-                with open(result_file, "r") as f: PRE_RESULT = json.load(f)
-            
-            for i in tqdm(range(0, len(all_requests), batch_size), desc="Batch Processing"):
 
-                batch_requests = all_requests[i:i+batch_size]
-                batch_inputs, batch_indices, outputs = [], [], [None] * len(batch_requests)
+            print(f"Total: {len(all_requests)} need inference, {len(cached_results)} cached")
+            # endregion
 
-                for idx, batch_request in enumerate(batch_requests):
-                    if args.update:
-                        try:
-                            # Only reuse previous results when both prompt and question match, and the previous result is 0/1
-                            ID, QID = batch_request['request_id'].split('_')
-                            assert (
-                                PRE_RESULT[ID]['Checklist'][int(QID)]['question'] == batch_request['prompt'].split('Question: "')[-1].split('"<|im_end|>')[0]
-                                and
-                                PRE_RESULT[ID]['Prompt'] == batch_request['prompt'].split('>Prompt: "')[-1].split('"\nQuestion:')[0]
-                            )
-                            outputs[idx] = ["no", "yes"][PRE_RESULT[ID]['Checklist'][int(QID)]['score']]
-                        except:
-                            batch_inputs.append({k: v for k, v in batch_request.items() if k in ["prompt", "multi_modal_data"]})
-                            batch_indices.append(idx)
-                    else:
-                        batch_inputs.append({k: v for k, v in batch_request.items() if k in ["prompt", "multi_modal_data"]})
-                        batch_indices.append(idx)
+            # region [2. Evaluation: Multi-round inference]
+            def extract_fn(text):
+                if 'thinking' in args.mllm.lower():
+                    return text.split('</think>\n\n')[-1] if '</think>\n\n' in text else ""
+                return text
 
-                if batch_inputs:
-                    llm_outputs = llm.generate(batch_inputs, sampling_params=sampling_params, use_tqdm=False)
-                    for llm_idx, batch_idx in enumerate(batch_indices): 
-                        outputs[batch_idx] = llm_outputs[llm_idx].outputs[0].text.split('</think>\n\n')[-1]
+            current_requests, current_max_tokens = all_requests, initial_max_tokens
+            for round_idx in range(max_rounds):
+                if not current_requests: break
+                print(f"[Round {round_idx+1}/{max_rounds}] {len(current_requests)} requests, max_tokens={current_max_tokens}")
+                
+                results, current_requests = run_inference(
+                    llm, current_requests, sampling_params, 
+                    current_max_tokens, extract_fn, round_idx == max_rounds - 1
+                )
+                cached_results.update(results)
+                current_max_tokens = min(current_max_tokens * 4, 8192)
+            # endregion
 
-                # Process all results
-                assert all(output is not None for output in outputs)
-                for req, output in zip(batch_requests, outputs):
-                    request_id, generated_text = req["request_id"], output
-                    score = 1 if re.search(r"\byes\b", generated_text) else 0 if re.search(r"\bno\b", generated_text) else ""
-                    
-                    meta_info = metadata_map[request_id]
-                    item_id = meta_info["item_id"]
-                    question_id = meta_info["question_id"]
-                    
-                    if item_id not in RESULT: RESULT[item_id] = copy.deepcopy(meta_info["metadata"])
-                    RESULT[item_id]['Checklist'][question_id]['score'] = score
-            
-            # Calculate image score for each image
+            # region [3. Post-process: Save the results]
+            RESULT = {}
+            for request_id in sorted(cached_results.keys()):
+                generated_text = cached_results[request_id]
+                score = 1 if re.search(r"\byes\b", generated_text) else 0 if re.search(r"\bno\b", generated_text) else ""
+                meta = metadata_map[request_id]
+                if meta["item_id"] not in RESULT: 
+                    RESULT[meta["item_id"]] = copy.deepcopy(meta["metadata"])
+                    for q in RESULT[meta["item_id"]]['Checklist']: q['score'] = ""
+                RESULT[meta["item_id"]]['Checklist'][meta["question_id"]]['score'] = score
+
             for item_id in RESULT:
                 valid_scores = [item["score"] for item in RESULT[item_id]["Checklist"] if "score" in item and item["score"] in [0, 1]]
                 RESULT[item_id]["image_score"] = sum(valid_scores) / len(valid_scores) if len(valid_scores) > 0 else ""
-            
-            # Calculate the mean score for this dimension
+
             mean_score_list = [meta["image_score"] for meta in RESULT.values() if meta["image_score"] != ""]
-            RESULT['mean_score'] = sum(mean_score_list) / len(mean_score_list)
-            
-            # Save results into json
+            RESULT['mean_score'] = sum(mean_score_list) / len(mean_score_list) if len(mean_score_list) > 0 else ""
+
             with open(f"{args.output_path}/{MODEL}/{TASK}-{args.mllm}.json", "w", encoding="utf-8") as f:
                 json.dump(RESULT, f, ensure_ascii=False, indent=2)
+            # endregion
 
 
 def start_evaluation_gemini(args, mllm_path, batch_size=256, max_retries=3, timeout=30):
@@ -237,119 +243,126 @@ def start_evaluation_gemini(args, mllm_path, batch_size=256, max_retries=3, time
     for MODEL in [m.strip() for m in args.model.split(",")]:
         for TASK in [t.strip() for t in args.gen_eval_file.split(",")]:
 
+            # region [1. Pre-process: Load data and build requests]
             print(f"===== Start Inference | {MODEL} | {TASK} =====")
+            image_path = os.path.join(args.output_path, MODEL, TASK)
+            image_names = sorted([f for f in os.listdir(image_path) if f.lower().endswith('.png')])
 
-            # If the model has already been evaluated for this task, skip the evaluation
             result_file = f"{args.output_path}/{MODEL}/{TASK}-{args.mllm}.json"
             if os.path.exists(result_file) and not args.update: continue
 
-            RESULT = {}
-            image_path = os.path.join(args.output_path, MODEL, TASK)
-            image_names = sorted([f for f in os.listdir(image_path) if f.lower().endswith('.png')])
-            
             with open(f"data/{TASK.strip()}.json", 'r', encoding='utf-8') as f:
                 eval_data = json.load(f)
-            
-            # Prepare all inference requests in batch
-            all_requests, metadata_map = [], {}
+
+            # Load cached results if updating
+            PRE_RESULT = json.load(open(result_file, "r")) if args.update and os.path.exists(result_file) else None
+
+            all_requests, metadata_map, cached_results = [], {}, {}
             dataset = PromptImageDataset(image_path, image_names, eval_data)
             
             for (ID, PATH, METADATA) in dataset:
+                # Check if result can be reused from cache
+                def is_cached(qid, question):
+                    try:
+                        return (
+                            PRE_RESULT[ID]['Prompt'] == METADATA["Prompt"] and
+                            PRE_RESULT[ID]['Checklist'][qid]['question'] == question["question"] and
+                            PRE_RESULT[ID]['Checklist'][qid].get('score') in [0, 1]
+                        )
+                    except: 
+                        return False
+                
+                # Skip image preprocessing if all questions are cached
+                if all(is_cached(qid, q) for qid, q in enumerate(METADATA["Checklist"])):
+                    for qid, q in enumerate(METADATA["Checklist"]):
+                        request_id = f"{ID}_{qid}"
+                        cached_results[request_id] = ["no", "yes"][PRE_RESULT[ID]['Checklist'][qid]['score']]
+                        metadata_map[request_id] = {"item_id": ID, "question_id": qid, "metadata": METADATA}
+                    continue
+                
+                # Preprocess image
                 with open(PATH, 'rb') as f: image_bytes = f.read()
                 mm_data = Part.from_bytes(data=image_bytes, mime_type='image/png')
-            
+                
+                # Create request for each question
                 for QID, QUESTION in enumerate(METADATA["Checklist"]):
-
-                    TEXT = f'Prompt: "{METADATA["Prompt"]}"\nQuestion: "{QUESTION["question"]}"'
-
                     request_id = f"{ID}_{QID}"
+                    metadata_map[request_id] = {"item_id": ID, "question_id": QID, "metadata": METADATA}
+                    
+                    # Check individual question cache
+                    if is_cached(QID, QUESTION):
+                        cached_results[request_id] = ["no", "yes"][PRE_RESULT[ID]['Checklist'][QID]['score']]
+                        continue
+                    
+                    TEXT = f'Prompt: "{METADATA["Prompt"]}"\nQuestion: "{QUESTION["question"]}"'
                     all_requests.append({
                         "request": [mm_data, TEMPLATE + '\n' + TEXT],
                         "request_id": request_id,
                     })
 
-                    metadata_map[request_id] = {
-                        "item_id": ID,
-                        "question_id": QID,
-                        "metadata": METADATA
-                    }
-            print(f"Total requests: {len(all_requests)}")
-            
-            if args.update:
-                with open(result_file, "r") as f: PRE_RESULT = json.load(f)
+            print(f"Total: {len(all_requests)} need inference, {len(cached_results)} cached")
+            # endregion
 
-            attempt_count, requests_to_process = 1, all_requests.copy()
-            while requests_to_process and attempt_count <= max_retries:
-
-                # Init Gemini client
-                client = genai.Client(api_key=args.mllm_path[1], http_options=HttpOptions(api_version="v1", timeout=1e3 * (timeout + 10 * (attempt_count - 1))))  # ms → s
+            # region [2. Evaluation: Multi-round inference]
+            attempt_count, current_requests = 1, all_requests
+            while current_requests and attempt_count <= max_retries:
+                # Init Gemini client with dynamic timeout
+                client = genai.Client(
+                    api_key=mllm_path[1], 
+                    http_options=HttpOptions(api_version="v1", timeout=1e3 * (timeout + 10 * (attempt_count - 1)))  # s → ms
+                )
                 
-                def call_model(input):
-                    if args.update:
-                        ID, QID = input['request_id'].split('_')
-                        try:
-                            # Only reuse previous results when both prompt and question match, and the previous result is 0/1
-                            assert (
-                                PRE_RESULT[ID]['Checklist'][int(QID)]['question'] == input['request'][1].split('Question: "')[-1][:-1] 
-                                and
-                                PRE_RESULT[ID]['Prompt'] == input['request'][1].split('\nPrompt: "')[-1].split('"\nQuestion:')[0]
-                            )
-                            return ["no", "yes"][int(PRE_RESULT[ID]['Checklist'][int(QID)]['score'])]
-                        except:
-                            pass
+                def call_model(request):
                     try:
                         response = client.models.generate_content(
                             model=mllm_path[0],
-                            contents=input["request"],
+                            contents=request["request"],
                             config=GenerateContentConfig(temperature=0.0)
                         )
                         return response.text.strip().lower() if response and response.text else ""
                     except Exception as e:
-                        print(f"[Error] request {input['request_id']}: {e}")
+                        print(f"[Error] request {request['request_id']}: {e}")
                         return ""
 
                 failed_requests = []
-                
-                for i in tqdm(range(0, len(requests_to_process), batch_size), desc=f"Batch Processing {TASK} - Attempt {attempt_count}"):
-                    batch_requests = requests_to_process[i:i+batch_size]
-                    batch_inputs = batch_requests
-                    
+                for i in tqdm(range(0, len(current_requests), batch_size), desc=f"Batch Processing {TASK} - Attempt {attempt_count}"):
+                    batch_requests = current_requests[i:i+batch_size]
                     with concurrent.futures.ThreadPoolExecutor(max_workers=batch_size) as executor:
-                        futures = list(executor.map(call_model, batch_inputs))
-                        results = [{'request_id': x['request_id'], 'output': y} for (x, y) in zip (batch_inputs, futures)]
+                        futures = list(executor.map(call_model, batch_requests))
 
-                    for req, res in zip(batch_requests, results):
-                        assert req['request_id'] == res['request_id']
-                        request_id, generated_text = res["request_id"], res['output']
-
-                        if generated_text == "": failed_requests.append(req)
-
-                        score = 1 if re.search(r"\byes\b", generated_text) else 0 if re.search(r"\bno\b", generated_text) else ""
-                        meta_info = metadata_map[request_id]
-                        item_id = meta_info["item_id"]
-                        question_id = meta_info["question_id"]
-
-                        if item_id not in RESULT: RESULT[item_id] = copy.deepcopy(meta_info["metadata"])
-                        RESULT[item_id]['Checklist'][question_id]['score'] = score
+                    for req, generated_text in zip(batch_requests, futures):
+                        if generated_text == "": 
+                            failed_requests.append(req)
+                            continue
+                        cached_results[req['request_id']] = generated_text
                 
                 if failed_requests: print(f"Round {attempt_count}: {len(failed_requests)} requests failed, preparing to retry...")
-                requests_to_process, attempt_count = failed_requests, attempt_count + 1
+                current_requests, attempt_count = failed_requests, attempt_count + 1 
 
-            if requests_to_process: print(f"Warning: {len(requests_to_process)} requests still failed after {max_retries} retries")
+            if current_requests: print(f"Warning: {len(current_requests)} requests still failed after {max_retries} retries")
+            # endregion
 
-            # Calculate image score for each image
+            # region [3. Post-process: Save the results]
+            RESULT = {}
+            for request_id in sorted(cached_results.keys()):
+                generated_text = cached_results[request_id]
+                score = 1 if re.search(r"\byes\b", generated_text) else 0 if re.search(r"\bno\b", generated_text) else ""
+                meta = metadata_map[request_id]
+                if meta["item_id"] not in RESULT: 
+                    RESULT[meta["item_id"]] = copy.deepcopy(meta["metadata"])
+                    for q in RESULT[meta["item_id"]]['Checklist']: q['score'] = ""
+                RESULT[meta["item_id"]]['Checklist'][meta["question_id"]]['score'] = score
+
             for item_id in RESULT:
                 valid_scores = [item["score"] for item in RESULT[item_id]["Checklist"] if "score" in item and item["score"] in [0, 1]]
                 RESULT[item_id]["image_score"] = sum(valid_scores) / len(valid_scores) if len(valid_scores) > 0 else ""
-            
-            # Calculate the mean score for this dimension
+
             mean_score_list = [meta["image_score"] for meta in RESULT.values() if meta["image_score"] != ""]
-            RESULT['mean_score'] = sum(mean_score_list) / len(mean_score_list)
-            
-            # Save results into json
-            save_root = f"{args.output_path}/{MODEL}/{TASK}-{args.mllm}.json"
-            with open(save_root, "w", encoding="utf-8") as f:
+            RESULT['mean_score'] = sum(mean_score_list) / len(mean_score_list) if len(mean_score_list) > 0 else ""
+
+            with open(f"{args.output_path}/{MODEL}/{TASK}-{args.mllm}.json", "w", encoding="utf-8") as f:
                 json.dump(RESULT, f, ensure_ascii=False, indent=2)
+            # endregion
 
 
 if __name__ == '__main__':
@@ -359,10 +372,11 @@ if __name__ == '__main__':
         FLUX.1-schnell, FLUX.1-dev, FLUX.1-Krea-dev | SD-3-Medium, SD-3.5-Medium, SD-3.5-Large | PixArt-Alpha, PixArt-Sigma | Qwen-Image
     """)
     parser.add_argument('--mllm', type=str, help="""
-        Gemini_2_5_Flash, Qwen2_5_VL_72B, Qwen3_VL_32B_Instruct, Qwen3_VL_32B_Thinking, Qwen3_VL_30B_A3B_Instruct, Qwen3_VL_30B_A3B_Thinking, Qwen3_VL_235B_A22B_Instruct, Qwen3_VL_235B_A22B_Thinking
+        Qwen-series: Qwen2_5_VL_72B, Qwen3_VL_8B_Instruct, Qwen3_VL_8B_Thinking, Qwen3_VL_32B_Instruct, Qwen3_VL_32B_Thinking, Qwen3_VL_30B_A3B_Instruct, Qwen3_VL_30B_A3B_Thinking, Qwen3_VL_235B_A22B_Instruct, Qwen3_VL_235B_A22B_Thinking
+        Gemini-series: Gemini_2_5_Flash
     """)
     parser.add_argument('--gen_eval_file', type=str, help="""
-        C-MI, C-MA, C-MR, C-TR | R-LR, R-BR, R-HR, R-PR | R-GR, R-AR | R-CR, R-RR
+        Composition: C-MI, C-MA, C-MR, C-TR | Reasoning: R-LR, R-BR, R-HR, R-PR, R-GR, R-AR, R-CR, R-RR
     """)
     parser.add_argument('--output_path', type=str, default="logs")
     parser.add_argument('--update', action='store_true', default=False)
@@ -372,14 +386,16 @@ if __name__ == '__main__':
     seed_everything(args.seed)
 
     MLLMs = {
-        "Gemini_2_5_Flash"            : ["gemini-2.5-flash", "GEMINI_API_KEY"],
         "Qwen2_5_VL_72B"              : "Qwen/Qwen2.5-VL-72B-Instruct",
+        "Qwen3_VL_8B_Instruct"        : "Qwen/Qwen3-VL-8B-Instruct",
+        "Qwen3_VL_8B_Thinking"        : "Qwen/Qwen3-VL-8B-Thinking",
         "Qwen3_VL_32B_Instruct"       : "Qwen/Qwen3-VL-32B-Instruct",
         "Qwen3_VL_32B_Thinking"       : "Qwen/Qwen3-VL-32B-Thinking",
         "Qwen3_VL_30B_A3B_Instruct"   : "Qwen/Qwen3-VL-30B-A3B-Instruct",
         "Qwen3_VL_30B_A3B_Thinking"   : "Qwen/Qwen3-VL-30B-A3B-Thinking",
         "Qwen3_VL_235B_A22B_Instruct" : "Qwen/Qwen3-VL-235B-A22B-Instruct",
         "Qwen3_VL_235B_A22B_Thinking" : "Qwen/Qwen3-VL-235B-A22B-Thinking",
+        "Gemini_2_5_Flash"            : ["gemini-2.5-flash", os.getenv("GEMINI_API_KEY")],
     }
     
     if "Qwen" in args.mllm: 
