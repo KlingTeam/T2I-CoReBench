@@ -80,7 +80,7 @@ We provide evaluation code supporting various MLLMs, including **Gemini 2.5 Flas
 > [!NOTE]
 > If Gemini 2.5 Flash is not available due to closed-source API costs, we recommend using [Qwen3-VL-32B-Thinking](https://huggingface.co/Qwen/Qwen3-VL-32B-Thinking) or [Qwen3-VL-30B-A3B-Thinking](https://huggingface.co/Qwen/Qwen3-VL-30B-A3B-Thinking) as alternatives. Both models offer a strong balance between human consistency and computational cost in open-source MLLMs (see [Table](#table-human-alignment) below). **Qwen3-VL-30B-A3B-Thinking** is more efficient due to its MoE architecture, making it a more cost-effective choice. Comprehensive evaluation results for different MLLM evaluators are available in our [🏆 Leaderboard](https://t2i-corebench.github.io/#leaderboard).
 
-For the **Gemini series**, please refer to the [Gemini documentation](https://ai.google.dev/gemini-api/docs) for environment setup. An official API key `GEMINI_API_KEY` should be set as an environment variable in `evaluate.py`.  For the **Qwen series**, please follow the [vLLM User Guide](https://docs.vllm.ai/en/latest/getting_started/quickstart.html#installation) and consult their [official repository](https://github.com/QwenLM/Qwen3-VL) for environment setup.
+For the **Gemini series**, please refer to the [Gemini documentation](https://ai.google.dev/gemini-api/docs) for environment setup. An official API key `GEMINI_API_KEY` should be set as an environment variable in `evaluate.py`.  For the **Qwen series**, please follow the [vLLM User Guide](https://docs.vllm.ai/projects/recipes/en/latest/Qwen/Qwen3-VL.html) and consult their [official repository](https://github.com/QwenLM/Qwen3-VL) for environment setup.
 
   ```bash
   bash eval.sh
