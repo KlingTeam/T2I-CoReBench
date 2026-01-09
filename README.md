@@ -44,6 +44,7 @@
 **Overview of our T2I-CoReBench.** (a) Our benchmark comprehensively covers two fundamental T2I capabilities (i.e., *composition* and *reasoning*), further refined into 12 dimensions. (b–e) Our benchmark poses greater challenges to advanced T2I models, with higher compositional density than [DPG-Bench](https://arxiv.org/abs/2403.05135) and greater reasoning intensity than [R2I-Bench](https://arxiv.org/abs/2505.23493), enabling clearer performance differentiation across models under real-world complexities. Each image is scored based on the ratio of correctly generated elements.
 
 ## 📣 News
+- `2026/01` 🌟 We have updated the evaluation results of [GPT-Image-1.5](https://platform.openai.com/docs/models/gpt-image-1.5).
 - `2026/01` 🌟 We have optimized `evaluate.py` to improve evaluation efficiency for open-source evaluators and updated the human alignment study results (see [📏 Run Evaluation](#-run-evaluation)).
 - `2026/01` 🌟 We have updated the evaluation results of [Qwen-Image-2512](https://huggingface.co/Qwen/Qwen-Image-2512).
 - `2025/12` 🌟 We have updated the evaluation results of [FLUX.2-dev](https://huggingface.co/black-forest-labs/FLUX.2-dev) and [LongCat-Image](https://huggingface.co/meituan-longcat/LongCat-Image).
