@@ -31,7 +31,7 @@
   </p>
 
   [**Ouxiang Li**](https://scholar.google.com/citations?user=g2oUt1AAAAAJ&hl)<sup>1*</sup>, [**Yuan Wang**](https://scholar.google.com/citations?user=jCmA4IoAAAAJ&hl)<sup>1</sup>, [**Xinting Hu**](https://scholar.google.com/citations?user=o6h6sVMAAAAJ&hl)<sup>†</sup>, [**Huijuan Huang**](https://scholar.google.com/citations?user=BMPobCoAAAAJ)<sup>2‡</sup>, [**Rui Chen**](https://scholar.google.com/citations?user=bJzPwcsAAAAJ)<sup>2</sup>, [**Jiarong Ou**](https://scholar.google.com/citations?user=DQLWdVUAAAAJ&hl)<sup>2</sup>, <br>
-  [**Xin Tao**](https://scholar.google.com/citations?user=sQ30WyUAAAAJ&hl)<sup>2†</sup>, [**Pengfei Wan**](https://scholar.google.com/citations?user=P6MraaYAAAAJ&hl)<sup>2</sup>, [**Xiaojuan Qi**](https://scholar.google.com/citations?user=bGn0uacAAAAJ)<sup>1</sup>, [**Fuli Feng**](https://scholar.google.com/citations?user=QePM4u8AAAAJ&hl)<sup>1</sup>
+  [**Xin Tao**](https://scholar.google.com/citations?user=sQ30WyUAAAAJ&hl)<sup>2†</sup>, [**Pengfei Wan**](https://scholar.google.com/citations?user=P6MraaYAAAAJ&hl)<sup>2</sup>, [**Xiaojuan Qi**](https://scholar.google.com/citations?user=bGn0uacAAAAJ)<sup>3</sup>, [**Fuli Feng**](https://scholar.google.com/citations?user=QePM4u8AAAAJ&hl)<sup>1</sup>
 
   <sup>1</sup>University of Science and Technology of China, <sup>2</sup>Kling Team, Kuaishou Technology, <sup>3</sup>The University of Hong Kong
   <br>
