@@ -93,25 +93,28 @@ The evaluation process will automatically assess the generated images across all
 
 <div id="table-human-alignment">
   <table>
-    <caption>Table: Human alignment study using <em>balanced accuracy</em> (%) and GPU (80GB) requirement for different MLLMs.</caption>
+    <caption>
+      <strong>Table:</strong> Human alignment study using <em>balanced accuracy</em> (%) and GPU (80GB) requirement for different MLLMs. 
+      Models marked with ✅ are used as evaluators on our <a href="https://t2i-corebench.github.io/#leaderboard">leaderboard</a>.
+    </caption>
     <thead>
       <tr><th>MLLM</th><th>MI</th><th>MA</th><th>MR</th><th>TR</th><th>Mean</th><th>#GPUs</th></tr>
     </thead>
     <tbody>
-      <tr><td>Qwen2.5-VL-72B-Instruct</td><td>81.3</td><td>63.1</td><td>64.2</td><td>73.7</td><td>70.6</td><td>4</td></tr>
+      <tr><td>✅ Qwen2.5-VL-72B-Instruct</td><td>81.3</td><td>63.1</td><td>64.2</td><td>73.7</td><td>70.6</td><td>4</td></tr>
       <tr><td>InternVL3-78B</td><td>70.8</td><td>56.8</td><td>56.5</td><td>67.7</td><td>62.9</td><td>4</td></tr>
       <tr><td>GLM4.5V-106B</td><td>78.0</td><td>61.3</td><td>60.3</td><td>71.8</td><td>67.8</td><td>4</td></tr>
       <tr><td>Qwen3-VL-8B-Instruct</td><td>72.0</td><td>56.2</td><td>56.6</td><td>65.4</td><td>62.5</td><td>1</td></tr>
-      <tr><td>Qwen3-VL-8B-Thinking</td><td>79.6</td><td>68.9</td><td>70.7</td><td>76.2</td><td>73.8</td><td>1</td></tr>
+      <tr><td>✅ Qwen3-VL-8B-Thinking</td><td>79.6</td><td>68.9</td><td>70.7</td><td>76.2</td><td>73.8</td><td>1</td></tr>
       <tr><td>Qwen3-VL-32B-Instruct</td><td>80.8</td><td>63.4</td><td>60.6</td><td>73.3</td><td>69.5</td><td>2</td></tr>
-      <tr><td>Qwen3-VL-32B-Thinking</td><td>81.9</td><td>72.9</td><td>75.4</td><td>79.8</td><td>77.5</td><td>2</td></tr>
+      <tr><td>✅ Qwen3-VL-32B-Thinking</td><td>81.9</td><td>72.9</td><td>75.4</td><td>79.8</td><td>77.5</td><td>2</td></tr>
       <tr><td>Qwen3-VL-30B-A3B-Instruct</td><td>83.1</td><td>61.9</td><td>59.1</td><td>74.2</td><td>69.6</td><td>2</td></tr>
-      <tr><td>Qwen3-VL-30B-A3B-Thinking</td><td>82.5</td><td>73.9</td><td>75.4</td><td>77.7</td><td>77.4</td><td>2</td></tr>
+      <tr><td>✅ Qwen3-VL-30B-A3B-Thinking</td><td>82.5</td><td>73.9</td><td>75.4</td><td>77.7</td><td>77.4</td><td>2</td></tr>
       <tr><td>GPT-4o</td><td>78.3</td><td>67.5</td><td>63.6</td><td>72.0</td><td>70.3</td><td>-</td></tr>
       <tr><td>OpenAI o3</td><td>83.5</td><td>77.8</td><td>80.4</td><td>86.8</td><td>82.1</td><td>-</td></tr>
       <tr><td>OpenAI o4 mini</td><td>81.9</td><td>74.7</td><td>77.0</td><td>83.0</td><td>79.1</td><td>-</td></tr>
       <tr><td>Gemini 2.5 Pro</td><td>83.4</td><td>76.5</td><td>82.2</td><td>88.4</td><td>82.6</td><td>-</td></tr>
-      <tr><td>Gemini 2.5 Flash</td><td>83.8</td><td>76.9</td><td>78.0</td><td>85.7</td><td>81.1</td><td>-</td></tr>
+      <tr><td>✅ Gemini 2.5 Flash</td><td>83.8</td><td>76.9</td><td>78.0</td><td>85.7</td><td>81.1</td><td>-</td></tr>
       <tr><td>Gemini 2.5 Flash Lite</td><td>69.1</td><td>60.1</td><td>58.0</td><td>74.5</td><td>65.4</td><td>-</td></tr>
       <tr><td>Gemini 2.0 Flash</td><td>73.5</td><td>61.0</td><td>67.7</td><td>77.1</td><td>69.8</td><td>-</td></tr>
     </tbody>
