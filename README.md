@@ -44,6 +44,7 @@
 **Overview of our T2I-CoReBench.** (a) Our benchmark comprehensively covers two fundamental T2I capabilities (i.e., *composition* and *reasoning*), further refined into 12 dimensions. (b–e) Our benchmark poses greater challenges to advanced T2I models, with higher compositional density than [DPG-Bench](https://arxiv.org/abs/2403.05135) and greater reasoning intensity than [R2I-Bench](https://arxiv.org/abs/2505.23493), enabling clearer performance differentiation across models under real-world complexities. Each image is scored based on the ratio of correctly generated elements.
 
 ## 📣 News
+- `2026/03` 🌟 We have updated the evaluation results of [Nano Banana 2](https://ai.google.dev/gemini-api/docs/models/gemini-3.1-flash-image-preview).
 - `2026/02` 🌟 We have updated the evaluation results of [Z-Image](https://huggingface.co/Tongyi-MAI/Z-Image).
 - `2026/01` 🔥 T2I-CoReBench is accepted to ICLR 2026. Thanks to all co-authors!
 - `2026/01` 🌟 We have updated the evaluation results of [FLUX.2-klein-4B](https://huggingface.co/black-forest-labs/FLUX.2-klein-4B) and [FLUX.2-klein-9B](https://huggingface.co/black-forest-labs/FLUX.2-klein-9B).
