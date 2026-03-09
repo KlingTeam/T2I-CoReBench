@@ -44,7 +44,7 @@
 **Overview of our T2I-CoReBench.** (a) Our benchmark comprehensively covers two fundamental T2I capabilities (i.e., *composition* and *reasoning*), further refined into 12 dimensions. (b–e) Our benchmark poses greater challenges to advanced T2I models, with higher compositional density than [DPG-Bench](https://arxiv.org/abs/2403.05135) and greater reasoning intensity than [R2I-Bench](https://arxiv.org/abs/2505.23493), enabling clearer performance differentiation across models under real-world complexities. Each image is scored based on the ratio of correctly generated elements.
 
 ## 📣 News
-- `2026/03` 🌟 We have added benchmark results evaluated by [Qwen3.5-9B](https://huggingface.co/Qwen/Qwen3.5-9B) and [Qwen3.5-35B-A3B](https://huggingface.co/Qwen/Qwen3.5-35B-A3B) in [🏆 Leaderboard](https://t2i-corebench.github.io/#leaderboard).
+- `2026/03` 🌟 We have added benchmark results evaluated by [Qwen3.5-9B](https://huggingface.co/Qwen/Qwen3.5-9B) and [Qwen3.5-35B-A3B](https://huggingface.co/Qwen/Qwen3.5-35B-A3B).
 - `2026/03` 🌟 We have updated the evaluation results of [Nano Banana 2](https://ai.google.dev/gemini-api/docs/models/gemini-3.1-flash-image-preview).
 - `2026/02` 🌟 We have updated the evaluation results of [Z-Image](https://huggingface.co/Tongyi-MAI/Z-Image).
 - `2026/01` 🔥 T2I-CoReBench is accepted to ICLR 2026. Thanks to all co-authors!
@@ -195,10 +195,12 @@ The evaluation process will automatically assess the generated images across all
 ## ✍️ Citation
 If you find the repo useful, please consider citing.
 ```
-@article{li2025easier,
+@inproceedings{
+  li2026easier,
   title={Easier Painting Than Thinking: Can Text-to-Image Models Set the Stage, but Not Direct the Play?},
-  author={Li, Ouxiang and Wang, Yuan and Hu, Xinting and Huang, Huijuan and Chen, Rui and Ou, Jiarong and Tao, Xin and Wan, Pengfei and Qi, Xiaojuan and Feng, Fuli},
-  journal={arXiv preprint arXiv:2509.03516},
-  year={2025}
+  author={Ouxiang Li and Yuan Wang and Xinting Hu and Huijuan Huang and Rui Chen and Jiarong Ou and Xin Tao and Pengfei Wan and Xiaojuan Qi and Fuli Feng},
+  booktitle={The Fourteenth International Conference on Learning Representations},
+  year={2026},
+  url={https://openreview.net/forum?id=iqAFhWistW}
 }
 ```
